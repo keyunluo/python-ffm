@@ -1,2 +1,6 @@
 *.o
 build/
+.vscode
+.vscode-upload.json
+dist/
+*.egg-info/

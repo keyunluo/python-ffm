@@ -156,6 +156,7 @@ class Prediction:
         if self._pred_ptr is not None:
             _lib.free_ffm_float(self._pred_ptr)
 
+# Print Trainning Process
 def print_line(data=None, val=True):
     if val:
         if data is None:
@@ -200,11 +201,19 @@ class FFM(BaseEstimator, ClassifierMixin):
         return loss
 
     def predict(self, ffm_data):
+        proba = self.predict_proba(ffm_data)
+        y_pred = [round(i) for i in proba]
+        return y_pred
+
+    def predict_proba(self, ffm_data):
         data = ffm_data._data
         model = self._model
         pred_ptr = _lib.ffm_predict_batch(data, model)
 
-        return Prediction(pred_ptr, data.contents)
+        prediction = Prediction(pred_ptr, data.contents)
+        proba = np.copy(prediction.pred)
+
+        return proba
 
     def _predict_row(self, nodes):
         n = nodes._length_
@@ -213,20 +222,27 @@ class FFM(BaseEstimator, ClassifierMixin):
         return pred
 
     def fit(self, X, y=None, num_iter=10, val_data=None, scoring='logloss', early_stopping=5, maximum=False):
+        
+        # Translate Traing Data
         if isinstance(X, FFMData):
             train_data = X
         else:
             train_data = FFMData(X, y)
+
+        # Init Model
         self.init_model(train_data) 
         self.set_params(num_iter=num_iter, early_stopping=early_stopping, scoring=scoring)
         
+        # Translate Validation Data
         val = True if val_data is not None else False
         if val:
             if not isinstance(val_data, FFMData):
                 val_data = FFMData(val_data[0], val_data[1])
+        
+        # Print Header
         print_line(data=None, val=val) 
         
-        # Score Recorder
+        # Score Recorder: > or <
         best_model = None
         score_index = -1
         if maximum:
@@ -236,6 +252,7 @@ class FFM(BaseEstimator, ClassifierMixin):
             cmp = lambda x, y: x < y
             score = 1
         
+        # Trainning Process
         for i in range(num_iter):
             train_loss = self.iteration(train_data)
             train_score = self.score(train_data, train_data.labels, scoring=scoring)
@@ -245,7 +262,7 @@ class FFM(BaseEstimator, ClassifierMixin):
                 if cmp(val_score, score):
                     score = val_score
                     score_index = i
-                    best_model = self._model
+                    best_model = self._model                   
                 print_line(data=[i, train_loss, train_score, val_score, score_index], val=val) 
             else:
                 if cmp(val_score, score):
@@ -268,9 +285,8 @@ class FFM(BaseEstimator, ClassifierMixin):
             val_data = X
         else:
             val_data = FFMData(X, y)
-        prediction = self.predict(val_data)
-        y_pred = prediction.pred
-        y_true = y
+        y_pred = self.predict_proba(val_data)
+        y_true = val_data.labels
         if scoring == 'logloss':
             return log_loss(y_true, y_pred)
         elif scoring == 'auc':
@@ -285,3 +301,4 @@ class FFM(BaseEstimator, ClassifierMixin):
     
 def read_model(path):
     return FFM().read_model(path)
+
