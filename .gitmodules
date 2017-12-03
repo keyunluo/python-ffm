@@ -1,0 +1,3 @@
+[submodule "libffm"]
+	path = libffm
+	url = https://github.com/guestwalk/libffm
