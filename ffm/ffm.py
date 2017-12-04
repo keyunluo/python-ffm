@@ -160,20 +160,20 @@ class Prediction:
 def print_line(data=None, val=True):
     if val:
         if data is None:
-            print("Iter".ljust(8) + "Train_Loss".ljust(16) + "Train_Score".ljust(16) + "Val_Score".ljust(16) + "Best_Iter".ljust(8))
+            print('%-8s%-16s%-16s%-16s%-8s' %("Iter", "Train_Loss", "Train_Score", "Val_Score", "Best_Iter"))
         else:
-            print(("%d".ljust(10) + "%.4f".ljust(14)  + "%.4f".ljust(14) + "%.4f".ljust(14) + "%d".ljust(10)) % (data[0], data[1], data[2], data[3], data[4]))
+            print('%-8d%-16.4f%-16.4f%-16.4f%-8d' %(data[0], data[1], data[2], data[3], data[4]))
     else:
         if data is None:
-            print("Iter".ljust(8) + "Train_Loss".ljust(16)  + "Train_Score".ljust(16)+ "Best_Iter".ljust(8))
+            print('%-8s%-16s%-16s%-16s%-8s' %("Iter", "Train_Loss", "Train_Score", "Best_Iter"))
         else:
-            print(("%d".ljust(10) + "%.4f".ljust(14) + "%.4f".ljust(14) + "%d".ljust(10)) % (data[0], data[1], data[2], data[3]))
+            print('%-8d%-16.4f%-16.4f%-8d' %(data[0], data[1], data[2], data[3]))
 # FFM model
 
 class FFM(BaseEstimator, ClassifierMixin):
-    def __init__(self, eta=0.2, lam=0.00002, k=4, normalization=True, num_iter=None, early_stopping=None, scoring=None):
+    def __init__(self, eta=0.2, lam=0.00002, k=4, normalization=True, num_iter=None, early_stopping=None, metric=None):
         self._params = FFM_Parameter(eta=eta, lam=lam, k=k, normalization=normalization)
-        self.set_params(eta=eta, lam=lam, k=k, normalization=normalization, num_iter=num_iter, early_stopping=early_stopping, scoring=scoring)
+        self.set_params(eta=eta, lam=lam, k=k, normalization=normalization, num_iter=num_iter, early_stopping=early_stopping, metric=metric)
         self._model = None
 
     def read_model(self, path):
@@ -221,8 +221,16 @@ class FFM(BaseEstimator, ClassifierMixin):
         pred = _lib.ffm_predict_array(nodes, n, model)
         return pred
 
-    def fit(self, X, y=None, num_iter=10, val_data=None, scoring='logloss', early_stopping=5, maximum=False):
-        
+    def fit(self, X, y=None, num_iter=10, val_data=None, metric='logloss', early_stopping=5, maximum=False):
+        '''
+        X: feature data or FFMData format
+        y: target
+        num_iter: number of iterations
+        val_data: data for validation, list or FFMData format
+        metric: str or self defined function, build_in metrics are 'auc', 'logloss', 'f1', 'accuracy'
+        early_stopping: early stopping rounds
+        maximum: whether the biger the score, the better the metric
+        '''
         # Translate Traing Data
         if isinstance(X, FFMData):
             train_data = X
@@ -231,7 +239,7 @@ class FFM(BaseEstimator, ClassifierMixin):
 
         # Init Model
         self.init_model(train_data) 
-        self.set_params(num_iter=num_iter, early_stopping=early_stopping, scoring=scoring)
+        self.set_params(num_iter=num_iter, early_stopping=early_stopping, metric=metric)
         
         # Translate Validation Data
         val = True if val_data is not None else False
@@ -255,10 +263,10 @@ class FFM(BaseEstimator, ClassifierMixin):
         # Trainning Process
         for i in range(num_iter):
             train_loss = self.iteration(train_data)
-            train_score = self.score(train_data, train_data.labels, scoring=scoring)
+            train_score = self.score(train_data, train_data.labels, scoring=metric)
        
             if val:
-                val_score = self.score(val_data, val_data.labels, scoring=scoring)
+                val_score = self.score(val_data, val_data.labels, scoring=metric)
                 if cmp(val_score, score):
                     score = val_score
                     score_index = i
@@ -287,16 +295,19 @@ class FFM(BaseEstimator, ClassifierMixin):
             val_data = FFMData(X, y)
         y_pred = self.predict_proba(val_data)
         y_true = val_data.labels
-        if scoring == 'logloss':
-            return log_loss(y_true, y_pred)
-        elif scoring == 'auc':
-            return roc_auc_score(y_true, y_pred)
-        elif scoring == 'f1':
-            y_pred = [round(i) for i in y_pred]
-            return f1_score(y_true, y_pred)
-        else: 
-            y_pred = [round(i) for i in y_pred]
-            return accuracy_score(y_true, y_pred)
+        if isinstance(scoring, str):           
+            if scoring == 'logloss':
+                return log_loss(y_true, y_pred)
+            elif scoring == 'auc':
+                return roc_auc_score(y_true, y_pred)
+            elif scoring == 'f1':
+                y_pred = [round(i) for i in y_pred]
+                return f1_score(y_true, y_pred)
+            else: 
+                y_pred = [round(i) for i in y_pred]
+                return accuracy_score(y_true, y_pred)
+        else :
+            return scoring(y_true, y_pred)
 
     
 def read_model(path):

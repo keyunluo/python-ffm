@@ -20,6 +20,8 @@ setup(name='ffm',
       install_requires=[
           'numpy',
           'scikit-learn',
+          'tqdm',
+          'pandas'
       ],
       maintainer='keyunluo',
       maintainer_email='streamer.ky@foxmail.com',

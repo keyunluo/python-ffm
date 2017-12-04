@@ -7,9 +7,7 @@ This is a python wrapped for LibFFM library writen in C++, orignal implementatio
 - [√] Scikit-Learn Compatible API
 - [√] Early_Stopping Support
 - [√] Evaluation Metric Support
-- [x] Pandas/Numpy Data Converter
-
-
+- [√] Pandas Data Converter
 
 ### Installation 
 
@@ -40,7 +38,7 @@ ffm_data_test = ffm.FFMData(X,y)
     
 # train the model for 10 iterations 
 model = ffm.FFM(eta=0.1, lam=0.0001, k=4)
-model.fit(ffm_data,num_iter=10, val_data=ffm_data_test, scoring='auc', early_stopping=6, maximum=True) 
+model.fit(ffm_data,num_iter=10, val_data=ffm_data_test, metric='auc', early_stopping=6, maximum=True) 
 
 # pred proba
 print(model.predict_proba(ffm_data_test))
