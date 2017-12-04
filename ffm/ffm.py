@@ -258,14 +258,15 @@ class FFM(BaseEstimator, ClassifierMixin):
         score_index = -1
         if maximum:
             cmp = lambda x, y: x > y
-            score = -1
+            score = -np.inf
         else:
             cmp = lambda x, y: x < y
-            score = 1
+            score = np.inf
         
         # Trainning Process
         for i in range(num_iter):
-            train_loss = self.iteration(train_data)
+            self.iteration(train_data)
+            train_loss = self.score(train_data, train_data.labels, scoring='logloss')
             train_score = self.score(train_data, train_data.labels, scoring=metric)
        
             if val:

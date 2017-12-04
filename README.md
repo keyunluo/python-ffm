@@ -11,7 +11,7 @@ This is a python wrapped for LibFFM library writen in C++, orignal implementatio
 
 ### Installation 
 
-Installing it(Tested in Ubuntu16.04 and Windows10, both Python2 and Python3):
+Installing it(Tested in Ubuntu16.04, both Python2 and Python3):
 
 ``` shell
 git clone --recursive https://github.com/keyunluo/python-ffm
