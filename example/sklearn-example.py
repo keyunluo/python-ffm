@@ -4,7 +4,7 @@ from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
 import numpy as np
 import pandas as pd
-from ffm import FFM, FFMFormatPandas
+from ffm import FFM, FFMFormatPandas, FFMData, save_data, load_data
 
 # define metric
 def Gini(y_true, y_pred):
@@ -50,8 +50,13 @@ train_data, val_data = train_test_split(train, test_size=0.2)
 
 ffm_train = FFMFormatPandas()
 ffm_train.fit(train, target=target, categorical=categorical, numerical=numerical)
-train_data = ffm_train.transform(train_data)
+train_data = ffm_train.transform_convert(train_data)
 val_data = ffm_train.transform(val_data)
+
+# save and load data
+save_data(val_data, 'val_data.pkl')
+X, y = load_data('val_data.pkl')
+val_data = FFMData(X, y)
 
 # make model for train
 model = FFM(eta=0.1, lam=0.0001, k=4)

@@ -125,18 +125,33 @@ def wrap_dataset(X, y):
     line_array = wrap_dataset_init(X, y)
     return _lib.ffm_convert_data(line_array, line_array._length_)
 
+# Print Trainning Process
+def print_line(data=None, val=True):
+    if val:
+        if data is None:
+            print('%-8s%-16s%-16s%-16s%-8s' %("Iter", "Train_Loss", "Train_Score", "Val_Score", "Best_Iter"))
+        else:
+            print('%-8d%-16.4f%-16.4f%-16.4f%-8d' %(data[0], data[1], data[2], data[3], data[4]))
+    else:
+        if data is None:
+            print('%-8s%-16s%-16s%-16s%-8s' %("Iter", "Train_Loss", "Train_Score", "Best_Iter"))
+        else:
+            print('%-8d%-16.4f%-16.4f%-8d' %(data[0], data[1], data[2], data[3]))
+
 class FFMData():
     def __init__(self, X=None, y=None):
+        self.data = X
+        self.labels = y
         if X is not None and y is not None:
             self._data = wrap_dataset(X, y)
-            self.labels = y
         elif X is not None and y is  None:
             self._data = wrap_dataset(X, [0]*len(X))
         else:
             self._data = None
+        self.size = len(X)
 
     def num_rows(self):
-        return self._data.size
+        return self.size
 
     def __del__(self):
         if self._data is not None:
@@ -156,18 +171,6 @@ class Prediction:
         if self._pred_ptr is not None:
             _lib.free_ffm_float(self._pred_ptr)
 
-# Print Trainning Process
-def print_line(data=None, val=True):
-    if val:
-        if data is None:
-            print('%-8s%-16s%-16s%-16s%-8s' %("Iter", "Train_Loss", "Train_Score", "Val_Score", "Best_Iter"))
-        else:
-            print('%-8d%-16.4f%-16.4f%-16.4f%-8d' %(data[0], data[1], data[2], data[3], data[4]))
-    else:
-        if data is None:
-            print('%-8s%-16s%-16s%-16s%-8s' %("Iter", "Train_Loss", "Train_Score", "Best_Iter"))
-        else:
-            print('%-8d%-16.4f%-16.4f%-8d' %(data[0], data[1], data[2], data[3]))
 # FFM model
 
 class FFM(BaseEstimator, ClassifierMixin):

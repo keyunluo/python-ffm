@@ -4,12 +4,6 @@ import numpy as np
 import pandas as pd 
 from .ffm import FFMData
 from tqdm import tqdm
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
-
-
 
 class FFMFormatPandas:
     def __init__(self):
@@ -20,6 +14,12 @@ class FFMFormatPandas:
         self.target = None
 
     def fit(self, df, target=None, categorical=None, numerical=None):
+        '''
+        df: Pandas DataFrame
+        target: label column, str
+        categorical: categorical columns, list
+        numerical: numerical columns, list
+        '''
         self.target = target
         self.categorical = categorical
         self.numerical = numerical
@@ -62,5 +62,8 @@ class FFMFormatPandas:
             
             X.append(feature_tuple)
             y.append(row[self.target])
-                
-        return FFMData(X, y)
+        return X, y      
+        
+    def transform_convert(self, df):
+        X, y = self.transform(df)
+        return FFMData(X, y)   
