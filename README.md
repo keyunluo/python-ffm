@@ -52,3 +52,7 @@ model = ffm.read_model('ololo.bin')
 # pred label
 print(model.predict(ffm_data_test))
 ```
+
+### Warning
+
+*For some versions of python the package may cause elf libary error, please delete the **libffm.py** file in the installation directory*
