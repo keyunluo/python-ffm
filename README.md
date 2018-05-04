@@ -56,3 +56,7 @@ print(model.predict(ffm_data_test))
 ### Warning
 
 **The package may cause elf library error for some versions of python , please delete the *libffm.py* file in the installation directory.**
+
+### Info
+
+This is just a toy, it is recommented to use [xLearn](https://github.com/aksnzhy/xlearn) for better performance.
