@@ -37,8 +37,8 @@ train, y = make_classification(n_samples=2000, n_features=5, n_informative=2, n_
 train = pd.DataFrame(train, columns=['int1','int2','float1','s1','s2'])
 train['int1'] = train['int1'].map(int) + np.random.randint(0, 8)
 train['int2'] = train['int2'].map(int)
-train['s1'] = round(np.log(abs(train['s1'] +1 ))).map(str)
-train['s2'] = round(np.log(abs(train['s2'] +1 ))).map(str)
+train['s1'] = np.log(abs(train['s1'] +1 )).round().map(str)
+train['s2'] = np.log(abs(train['s2'] +1 )).round().map(str)
 train['clicked'] = y
 
 # transform data

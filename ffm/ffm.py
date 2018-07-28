@@ -1,9 +1,12 @@
 # coding: utf-8
 
 import os
-path = os.path.dirname(os.path.abspath(__file__))
-libffm_file = [i for i in os.listdir(path) if i.startswith('libffm.')][0]
-lib_path = path + '/' + libffm_file
+path = os.path.dirname(os.path.realpath(__file__))
+libffm_file = [p for p in os.listdir(path) if p.startswith('libffm.') or p.endswith('.so')]
+if len(libffm_file) < 1:
+    print("No libffm.so Build!")
+    exit(1)
+lib_path = path + '/' + libffm_file[0]
 
 # binding code
 
@@ -102,9 +105,9 @@ def wrap_tuples(row):
 
     for i, (f, j, v) in enumerate(row):
         node = nodes_array[i]
-        node.f = f
-        node.j = j
-        node.v = v
+        node.f = int(f)
+        node.j = int(j)
+        node.v = int(v)
 
     return nodes_array
 
@@ -116,7 +119,7 @@ def wrap_dataset_init(X, target):
         d = data[i]
         nodes = wrap_tuples(x)
         d.data = nodes
-        d.label = y
+        d.label = int(y)
         d.size = nodes._length_
 
     return data

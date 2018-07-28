@@ -12,7 +12,10 @@ def save_data(data, path=None):
     '''
     if path is None:
         path = './data.pkl'
-    pickle.dump(data, open(path, "wb"), protocol=4)
+    try:
+        pickle.dump(data, open(path, "wb"), protocol=4)
+    except:
+        pickle.dump(data, open(path, "wb"), protocol=2)
     print("Save Data to %s Successfully" % path)
 
 def load_data(path):
